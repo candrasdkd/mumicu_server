@@ -5,15 +5,16 @@ const { DataTypes } = Sequelize;
 
 const Absensi = db.define('absensi', {
     username: {
-        allowNull: true,
         type: DataTypes.STRING
     },
     user_id: {
-        allowNull: true,
         type: DataTypes.INTEGER
     },
+    status:{
+        type: DataTypes.STRING,
+        defaultValue: 'Hadir',
+    },
     created_at: {
-        allowNull: true,
         type: DataTypes.DATEONLY,
         defaultValue: DataTypes.NOW,
         validate: {

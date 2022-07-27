@@ -5,28 +5,31 @@ import Moment from "moment";
 
 export const ManualAbsensi = async (req, res) => {
     let body = req.body
-    try {
-        let newItem = []
-        let totalUsersHasAbsent = 0
-        for (let index = 0; index < body.length; index++) {
-            const hasAbsen = await Absensi.findAll({
-                where: {
-                    user_id: body[index].user_id,
-                    created_at: Moment(body[index].created_at).format("YYYY-MM-DD")
-                },
-            });
+    let usersNotAbsen = []
+    let usersHasAbsen = []
+    let totalUsersHasAbsent = 0
+    for (let index = 0; index < body.length; index++) {
+        const hasAbsen = await Absensi.findAll({
+            where: {
+                user_id: body[index].user_id,
+                created_at: Moment(body[index].created_at).format("YYYY-MM-DD")
+            },
+        });
 
-            if (hasAbsen.length === 0) {
-                newItem.push(body[index])
-            } else {
-                totalUsersHasAbsent += hasAbsen.length
-            }
-        }
-        if (newItem.length > 0) {
-            await Absensi.bulkCreate(newItem)
-            res.json({ status: 200, data: { newItem, totalUsersHasAbsent }, message: "Success" });
+        if (hasAbsen.length === 0) {
+            usersNotAbsen.push(body[index])
         } else {
-            res.json({ status: 400, data: { newItem, totalUsersHasAbsent }, message: "Semua User Yang Ada Sudah Absen" });
+            usersHasAbsen.push(body[index])
+            totalUsersHasAbsent += hasAbsen.length
+        }
+    }
+
+    try {
+        if (usersNotAbsen.length > 0 && usersHasAbsen.length === 0) {
+            await Absensi.bulkCreate(usersNotAbsen)
+            res.json({ status: 200, message: "Success absen" });
+        } else {
+            return res.status(400).json({ status: 400, message: `Ada ${totalUsersHasAbsent} user yang sudah absen` });
         }
     } catch (error) {
         console.log('Error in Function Manual Absensi', error);
@@ -38,20 +41,21 @@ export const ScanAbsensi = async (req, res) => {
     const hasAbsen = await Absensi.findAll({
         where: {
             user_id,
-            created_at
+            created_at: Moment(created_at).format("YYYY-MM-DD")
         }
     });
 
-    if (hasAbsen.length === 1) {
-        return res.status(400).json({ message: "Kamu Sudah Absen" });
-    }
     try {
-        await Absensi.create({
-            username,
-            user_id,
-            created_at
-        })
-        res.json({ status: 200, message: "Success" });
+        if (hasAbsen.length === 0) {
+            await Absensi.create({
+                username,
+                user_id: parseInt(user_id),
+                created_at
+            })
+            res.json({ status: 200, message: "Success absen" });
+        } else {
+            return res.status(400).json({ message: "Kamu Sudah Absen" });
+        }
     } catch (error) {
         console.log('Error in Function Scan Absensi', error);
     }

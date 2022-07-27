@@ -114,7 +114,7 @@ export const Login = async (req, res) => {
             httpOnly: true,
             maxAge: 24 * 60 * 60 * 1000
         });
-        const data = { accessToken, userInfo: { id, authLevel } }
+        const data = { accessToken, userInfo: { id, authLevel, userName } }
         res.json({ status: 200, data, message: "Success" });
     } catch (error) {
         res.status(404).json({ message: "Username not found" });

@@ -14,4 +14,4 @@ app.use(cors({ credentials: true, origin: '*' }));
 app.use(cookieParser());
 app.use(router);
 
-app.listen(port, () => console.log(`Server running at port http://localhost:${port}`));
+app.listen(port, () => console.log(`Server running at port ${port}`));
